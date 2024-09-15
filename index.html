@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="icon" href="icon.jpg" type="image/x-icon" />
+    <title>Measurement Tolerance Checker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+			background: url('background.jpg') no-repeat center center fixed;
+			background-size: cover;
+        }
+        .container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        input, select {
+            padding: 5px;
+            width: 200px;
+        }
+        /* Okları gizleme - Tüm tarayıcılar için */
+        input[type="number"] {
+            -moz-appearance: textfield; /* Firefox için */
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none; /* Chrome, Safari, Edge için */
+            margin: 0;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .tolerance-inside {
+            color: green;
+        }
+        .tolerance-outside {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Measurement Tolerance Checker</h2>
+
+        <div class="input-group">
+            <label for="unit">Select Unit:</label>
+            <select id="unit">
+                <option value="mm">mm</option>
+                <option value="cm">cm</option>
+                <option value="inch">inch</option>
+                <option value="gr">gr</option>
+            </select>
+        </div>
+
+        <div class="input-group">
+            <label for="idsMeasurement">IDS Measurement:</label>
+            <input type="number" id="idsMeasurement" placeholder="Enter IDS measurement">
+        </div>
+
+        <div class="input-group">
+            <label for="productMeasurement">Product Measurement:</label>
+            <input type="number" id="productMeasurement" placeholder="Enter Product measurement">
+        </div>
+
+        <div class="input-group">
+            <label for="tolerance">Select Tolerance:</label>
+            <select id="tolerance">
+                <option value="5">5%</option>
+                <option value="10">10%</option>
+            </select>
+        </div>
+
+        <button onclick="checkTolerance()">Check Tolerance</button>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        // Eksi değer girişini engelle
+        document.querySelectorAll('input[type="number"]').forEach(function(input) {
+            input.addEventListener('input', function() {
+                if (this.value < 0) {
+                    alert('Negative values are not allowed.');
+                    this.value = ''; // Eksi değer girilirse input alanını temizler
+                }
+            });
+        });
+
+        // Yön tuşlarıyla veri arttırmayı engelle ve inputlar arasında geçiş yap
+        document.addEventListener('keydown', function(event) {
+            if (event.target.type === 'number' && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+                event.preventDefault(); // Yön tuşları ile arttırmayı/azaltmayı engelle
+                let inputs = Array.from(document.querySelectorAll('input, select'));
+                let currentIndex = inputs.indexOf(event.target);
+                
+                if (event.key === 'ArrowUp' && currentIndex > 0) {
+                    inputs[currentIndex - 1].focus(); // Yukarı tuşuna basıldığında bir önceki inputa geç
+                }
+                if (event.key === 'ArrowDown' && currentIndex < inputs.length - 1) {
+                    inputs[currentIndex + 1].focus(); // Aşağı tuşuna basıldığında bir sonraki inputa geç
+                }
+            }
+        });
+
+        function checkTolerance() {
+            const idsMeasurement = parseFloat(document.getElementById('idsMeasurement').value);
+            const productMeasurement = parseFloat(document.getElementById('productMeasurement').value);
+            const tolerance = parseFloat(document.getElementById('tolerance').value);
+            const unit = document.getElementById('unit').value;
+            const resultDiv = document.getElementById('result');
+
+            if (isNaN(idsMeasurement) || isNaN(productMeasurement)) {
+                resultDiv.textContent = 'Please enter valid measurements.';
+                resultDiv.className = 'result';
+                return;
+            }
+
+            const toleranceAmount = idsMeasurement * (tolerance / 100);
+            const lowerLimit = idsMeasurement - toleranceAmount;
+            const upperLimit = idsMeasurement + toleranceAmount;
+
+            if (productMeasurement < lowerLimit) {
+                const difference = (lowerLimit - productMeasurement).toFixed(2);
+                resultDiv.textContent = `Tolerance Outside: -${difference} ${unit} X`;
+                resultDiv.className = 'result tolerance-outside';
+            } else if (productMeasurement > upperLimit) {
+                const difference = (productMeasurement - upperLimit).toFixed(2);
+                resultDiv.textContent = `Tolerance Outside: +${difference} ${unit} X`;
+                resultDiv.className = 'result tolerance-outside';
+            } else {
+                const percentageDifference = (((productMeasurement - idsMeasurement) / idsMeasurement) * 100).toFixed(2);
+                const sign = percentageDifference >= 0 ? '+' : '';
+                resultDiv.textContent = `Tolerance Inside: ${sign}${percentageDifference}% ✓`;
+                resultDiv.className = 'result tolerance-inside';
+            }
+        }
+    </script>
+</body>
+</html>
