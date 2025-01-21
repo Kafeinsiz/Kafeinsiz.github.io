@@ -32,12 +32,51 @@
             font-size: 16px;
             cursor: pointer;
         }
+          #topnav {
+   width: 100%;
+
+   position: fixed;
+   top: 0;
+   left: 0;
+
+   background-color: Black;
+
+   font-family: Arial, sans-serif;
+   font-size: 15px;
+}
+
+        .nav-link {
+   display: inline-block;
+   width: 100px;
+   height: 55px;
+
+   color: White;
+
+   text-align: center;
+   line-height: 55px;
+
+   text-decoration: none;
+   
+}
+
+#logo {
+   width: 120px;
+}
+#coating {
+    background-color: #148aff;
+}
     </style>
 </head>
 <body>
-    <h1>Tablo Güncelleme ve Ortalama Hesaplama</h1>
-    <textarea id="tableInput" placeholder="Tabloyu buraya yapıştırın..."></textarea>
+          <nav id="topnav">
+         <a id="logo" class="nav-link" href="index.html">Tolerance Check</a>
+         <a id="coating" class="nav-link" href="kaplama.html">Coating Check</a>
+      </nav>
+      <p>.</p>
+    <h1>Ortalama Kalınlık Hesaplama</h1>
+    <textarea id="tableInput" placeholder="Tabloyu sadece |43|51|45|39|47| şeklinde beş değerin sütunu olarak buraya yapıştırın..."></textarea>
     <button onclick="updateTable()">Tabloyu Güncelle</button>
+    <p></p>
     <table id="dataTable">
         <thead>
             <tr>
