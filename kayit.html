@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ağırlık Tolerans Kontrol Ve Kayıt Sistemi v2.6</title>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <style>
+/* Navbar Temel Tasarımı */
+.navbar {
+    background-color: #1a73e8; /* Google Mavisi */
+    padding: 10px 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed; /* Sayfanın üstüne sabitler */
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 2000;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.nav-links {
+    display: flex;
+    gap: 20px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 5px;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Hover (Üzerine gelince) */
+.nav-links a:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Aktif Sayfa İşareti */
+.nav-links a.active {
+    background-color: #ffffff;
+    color: #1a73e8;
+    font-weight: 700;
+}
+
+/* Mobil Cihazlar İçin Uyumluluk */
+@media (max-width: 768px) {
+    .nav-links { gap: 5px; }
+    .nav-links a { font-size: 11px; padding: 5px; }
+}
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; padding: 20px; padding-bottom: 80px; margin: 0; }
+        .container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 950px; box-sizing: border-box; }
+        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; padding-top: 80px; margin: 0;}
+        
+        .header-section { display: flex; gap: 15px; margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; flex-wrap: wrap; }
+        .input-group { display: flex; flex-direction: column; flex: 1; min-width: 180px; }
+        
+        .main-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        
+        label { font-weight: 600; font-size: 13px; margin-bottom: 4px; color: #5f6368; }
+        input { padding: 10px; border: 1px solid #dadce0; border-radius: 6px; outline: none; }
+        
+        .weight-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        
+        .results-box { 
+            position: relative; background-color: #e8f0fe; padding: 20px; border-radius: 8px; border: 1px solid #d2e3fc; overflow: hidden; z-index: 1;
+        }
+        .results-box::before {
+            content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url('https://plain-eeur-prod-public.komododecks.com/202604/11/po9vIas03oHKgc0eDO26/image.jpg'); background-size: cover; background-position: center; opacity: 0.53; z-index: -1;
+        }
+
+        .res-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(23, 78, 166, 0.2); padding-bottom: 8px; }
+        .res-value { font-weight: 800; font-size: 20px; color: #174ea6; font-family: 'Courier New', monospace; }
+        #resMax { color: #d93025; } 
+        #resMin { color: #188038; } 
+
+        .box-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .box-item { display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 5px; border: 1px solid #eee; border-radius: 4px; }
+        .box-item input { width: 70px; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; }
+        .btn-add { background-color: #1a73e8; }
+        .btn-excel { background-color: #217346; }
+        .btn-clear { background-color: #d93025; margin-top: 10px; width: 100%; }
+        
+        .history-section { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; min-width: 850px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #f8f9fa; }
+        
+        .action-btns { display: flex; gap: 4px; justify-content: center; }
+        .btn-del { background-color: #fce8e6; color: #d93025; border: 1px solid #fce8e6; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold; }
+        .btn-edit { background-color: #e8f0fe; color: #1a73e8; border: 1px solid #e8f0fe; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; }
+            .header-section { flex-direction: column; }
+            .input-group { min-width: 100%; }
+            body { padding: 10px; padding-bottom: 60px; }
+        }
+        
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
+            background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 20px; box-sizing: border-box; z-index: 1000;
+        }
+        .footer-text { font-size: 12px; color: #777; font-style: italic; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="tolerans.html">Tolerans Hesaplama</a></li>
+        <li><a href="palet.html">Palet Verimliliği</a></li>
+        <li><a href="kaplama.html">Kaplama Kalınlığı</a></li>
+        <li><a href="#" class="active">Ağırlık Tolerans Kayıt</a></li>
+    </ul>
+</nav>
+<div class="container">
+    <h2>Ağırlık Tolerans Kontrol Ve Kayıt Sistemi v2.6</h2>
+    
+    <div class="header-section">
+        <div class="input-group">
+            <label>Tarih</label>
+            <input type="date" id="tarih">
+        </div>
+        <div class="input-group">
+            <label>Hat Numarası *</label>
+            <input type="text" id="hatNo" placeholder="Örn: 12" inputmode="numeric">
+        </div>
+        <div class="input-group">
+            <label>Ürün Kodu *</label>
+            <input type="text" id="urunKodu" placeholder="Örn: 152.0262.033" oninput="formatUrunKodu(this)" inputmode="numeric">
+        </div>
+    </div>
+
+    <div class="main-layout">
+        <div>
+            <div class="weight-row">
+                <div style="flex: 2;">
+                    <label style="color: #e67e22;">En Hafif Parça Ağırlığı (Gr) *</label>
+                    <input type="number" id="parcaAgirligi" style="width: 100%; box-sizing: border-box;" placeholder="Örn: 30" step="any" inputmode="decimal">
+                </div>
+                <div style="flex: 1;">
+                    <label>Tolerans (%)</label>
+                    <input type="number" id="tolerans" value="10" min="1" max="100" style="width: 100%; box-sizing: border-box; background: #fffbe6;">
+                </div>
+            </div>
+            
+            <label>10 Adet Kutu Ölçümü (Gr)</label>
+            <div class="box-grid" id="boxContainer"></div>
+        </div>
+
+        <div class="results-box">
+            <h3 style="margin-top:0; color:#174ea6;">Anlık Analiz Özeti</h3>
+            <div class="res-row"><span>Ortalama:</span><span id="resOrt" class="res-value">-</span></div>
+            <div class="res-row"><span>Max Limit:</span><span id="resMax" class="res-value">-</span></div>
+            <div class="res-row"><span>Min Limit:</span><span id="resMin" class="res-value">-</span></div>
+            
+            <div class="btn-group">
+                <button class="btn btn-add" onclick="listeyeEkle()">Listeye Satır Ekle</button>
+                <button class="btn btn-excel" onclick="excelIndir()">Excel'e Aktar</button>
+            </div>
+            <button class="btn btn-clear" onclick="listeyiTemizle()">Tüm Listeyi Sıfırla</button>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3>Kaydedilmeyi Bekleyen Satırlar</h3>
+        <table id="veriTablosu">
+            <thead>
+                <tr>
+                    <th style="width: 80px;">Düzenle/Sil</th>
+                    <th>Tarih</th><th>Hat</th><th>Ürün</th><th>Ölçümler</th><th>Ort.</th><th>Parça & Tol.</th><th>Max</th><th>Min</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-text">
+        © 2026 Ağırlık Tolerans Kontrol Ve Kayıt Sistemi By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
+    </div>
+</footer>
+
+<script>
+    const boxContainer = document.getElementById('boxContainer');
+    let birikmisVeriler = JSON.parse(localStorage.getItem('tumKayitlar')) || [];
+
+    for(let i=1; i<=10; i++) {
+        boxContainer.innerHTML += `<div class="box-item"><label>${i}:</label><input type="number" class="box-val" step="any" inputmode="decimal"></div>`;
+    }
+
+    window.onload = () => {
+        document.getElementById('tarih').valueAsDate = new Date();
+        tabloyuGuncelle();
+    };
+
+    function formatUrunKodu(input) {
+        let val = input.value.replace(/[^0-9]/g, '');
+        let formatted = "";
+        if (val.length > 0) {
+            formatted += val.substr(0, 3);
+            if (val.length > 3) formatted += "." + val.substr(3, 4);
+            if (val.length > 7) formatted += "." + val.substr(7, 3);
+        }
+        input.value = formatted;
+    }
+
+    function hesapla() {
+        let degerler = Array.from(document.querySelectorAll('.box-val')).map(el => parseFloat(el.value) || 0);
+        let toplam = degerler.reduce((a, b) => a + b, 0);
+        let dolu = degerler.filter(v => v > 0).length;
+        let ort = dolu > 0 ? toplam / dolu : 0;
+        
+        let pVal = parseFloat(document.getElementById('parcaAgirligi').value) || 0;
+        let tolYuzde = (parseFloat(document.getElementById('tolerans').value) || 0) / 100;
+
+        document.getElementById('resOrt').innerText = ort.toFixed(2);
+        
+        if(ort > 0 && pVal > 0) {
+            document.getElementById('resMax').innerText = (ort + (pVal * (1 + tolYuzde))).toFixed(2);
+            document.getElementById('resMin').innerText = (ort - (pVal * (1 - tolYuzde))).toFixed(2);
+        } else {
+            document.getElementById('resMax').innerText = "-";
+            document.getElementById('resMin').innerText = "-";
+        }
+    }
+
+    document.addEventListener('input', (e) => {
+        if(e.target.classList.contains('box-val') || e.target.id === 'parcaAgirligi' || e.target.id === 'tolerans') {
+            hesapla();
+        }
+    });
+
+    function listeyeEkle() {
+        const h = document.getElementById('hatNo').value.trim();
+        const k = document.getElementById('urunKodu').value.trim();
+        const p = document.getElementById('parcaAgirligi').value;
+        const t = document.getElementById('tolerans').value;
+        if(!h || !k || !p) { alert("Lütfen yıldızlı alanları doldurun!"); return; }
+
+        const olcumler = Array.from(document.querySelectorAll('.box-val')).map(el => el.value || "0").join(", ");
+        birikmisVeriler.push({
+            tarih: document.getElementById('tarih').value,
+            hat: h, kod: k, detay: olcumler,
+            ort: document.getElementById('resOrt').innerText,
+            parca: p,
+            tol: t,
+            max: document.getElementById('resMax').innerText,
+            min: document.getElementById('resMin').innerText
+        });
+        localStorage.setItem('tumKayitlar', JSON.stringify(birikmisVeriler));
+        tabloyuGuncelle();
+        document.querySelectorAll('.box-val').forEach(el => el.value = "");
+        document.getElementById('parcaAgirligi').value = "";
+        document.getElementById('tolerans').value = "10";
+        hesapla();
+    }
+
+    function satirSil(index) {
+        if(confirm("Bu satırı silmek istediğinize emin misiniz?")) {
+            birikmisVeriler.splice(index, 1);
+            localStorage.setItem('tumKayitlar', JSON.stringify(birikmisVeriler));
+            tabloyuGuncelle();
+        }
+    }
+
+    function satirDuzenle(index) {
+        const veri = birikmisVeriler[index];
+        document.getElementById('tarih').value = veri.tarih;
+        document.getElementById('hatNo').value = veri.hat;
+        document.getElementById('urunKodu').value = veri.kod;
+        document.getElementById('parcaAgirligi').value = veri.parca;
+        document.getElementById('tolerans').value = veri.tol || "10";
+        
+        const olcumlerArray = veri.detay.split(", ");
+        const inputs = document.querySelectorAll('.box-val');
+        inputs.forEach((input, i) => { input.value = olcumlerArray[i] === "0" ? "" : olcumlerArray[i]; });
+        
+        hesapla();
+        birikmisVeriler.splice(index, 1);
+        localStorage.setItem('tumKayitlar', JSON.stringify(birikmisVeriler));
+        tabloyuGuncelle();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function tabloyuGuncelle() {
+        const tbody = document.querySelector("#veriTablosu tbody");
+        tbody.innerHTML = birikmisVeriler.map((s, index) => `
+            <tr>
+                <td>
+                    <div class="action-btns">
+                        <button class="btn-edit" onclick="satirDuzenle(${index})" title="Düzenle">✎</button>
+                        <button class="btn-del" onclick="satirSil(${index})" title="Sil">X</button>
+                    </div>
+                </td>
+                <td>${s.tarih}</td><td>${s.hat}</td><td>${s.kod}</td><td>${s.detay}</td><td>${s.ort}</td>
+                <td><strong>${s.parca}g ±${s.tol}%</strong></td>
+                <td>${s.max}</td><td>${s.min}</td>
+            </tr>
+        `).reverse().join("");
+    }
+
+    function excelIndir() {
+        if(birikmisVeriler.length === 0) return;
+        const formatli = birikmisVeriler.map(s => ({
+            "Tarih": s.tarih, "Hat No": s.hat, "Ürün Kodu": s.kod, "Ölçümler": s.detay,
+            "Kutu Ortalama": parseFloat(s.ort), "Parça & Tolerans": `${s.parca}g ±${s.tol}%`, "Max": parseFloat(s.max), "Min": parseFloat(s.min)
+        }));
+        const ws = XLSX.utils.json_to_sheet(formatli);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Analiz");
+        XLSX.writeFile(wb, `Rapor_${new Date().toLocaleDateString()}.xlsx`);
+    }
+
+    function listeyiTemizle() {
+        if(confirm("Tüm listeyi silmek istediğinize emin misiniz?")) {
+            birikmisVeriler = []; localStorage.removeItem('tumKayitlar'); tabloyuGuncelle();
+        }
+    }
+</script>
+</body>
+</html>

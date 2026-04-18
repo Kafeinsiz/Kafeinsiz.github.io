@@ -1,137 +1,229 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kaplama ortalaması hesaplama</title>
+    <title>Kaplama Kalınlığı Analizi</title>
     <style>
-        .prevent-select {
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10 and IE 11 */
-  user-select: none; /* Standard syntax */
-}
-        table {
-            border-collapse: collapse;
-            width: 100%;
-            text-align: center;
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            padding: 80px 20px 80px 20px;
+            display: flex;
+            justify-content: center;
         }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-        textarea {
-            width: 100%;
-            height: 150px;
-            margin: 10px 0;
-        }
-        button {
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #1a73e8;
             padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
+            display: flex; justify-content: center; align-items: center;
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-          #topnav {
-   width: 100%;
+        .nav-links { display: flex; gap: 20px; list-style: none; margin: 0; padding: 0; }
+        .nav-links a { color: white; text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 5px; transition: 0.3s; }
+        .nav-links a:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .nav-links a.active { background-color: #ffffff; color: #1a73e8; font-weight: 700; }
 
-   position: fixed;
-   top: 0;
-   left: 0;
+        .container { 
+            background: #fff; padding: 25px; border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 1100px; 
+        }
 
-   background-color: Black;
+        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
 
-   font-family: Arial, sans-serif;
-   font-size: 15px;
-}
+        .input-section { margin-bottom: 25px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #dadce0; }
+        
+        textarea { 
+            width: 100%; height: 100px; padding: 12px; border: 1px solid #dadce0; 
+            border-radius: 6px; resize: vertical; font-family: 'Courier New', monospace; 
+            box-sizing: border-box; background: #fffbe6; font-size: 14px;
+        }
 
-        .nav-link {
-   display: inline-block;
-   width: 100px;
-   height: 55px;
+        .action-buttons { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { 
+            flex: 1; padding: 14px; border: none; border-radius: 6px; cursor: pointer; 
+            font-weight: bold; font-size: 15px; transition: 0.3s;
+        }
+        .btn-calc { background-color: #1a73e8; color: white; }
+        .btn-copy { background-color: #34a853; color: white; display: none; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
 
-   color: White;
+        /* HATA MESAJI */
+        #errorMsg { 
+            display: none; color: #d93025; background: #fce8e6; 
+            padding: 10px; border-radius: 6px; margin-top: 10px; 
+            font-weight: bold; text-align: center; font-size: 14px;
+            border: 1px solid #fad2cf;
+        }
 
-   text-align: center;
-   line-height: 55px;
+        /* TABLO TASARIMI */
+        .table-container { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; min-width: 900px; }
+        th { background-color: #f8f9fa; color: #5f6368; font-size: 12px; padding: 12px 8px; border: 1px solid #ddd; }
+        td { border: 1px solid #eee; padding: 12px 8px; text-align: center; font-size: 14px; }
+        .avg-column { background-color: #e8f0fe; font-weight: bold; color: #1a73e8; border-left: 2px solid #1a73e8; }
 
-   text-decoration: none;
-   
-}
-
-#logo {
-   width: 120px;
-}
-#coating {
-    background-color: #148aff;
-}
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
+            background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 20px; box-sizing: border-box; z-index: 1000;
+        }
+        .footer-text { font-size: 12px; color: #777; font-style: italic; }
     </style>
 </head>
 <body>
-          <nav id="topnav">
-         <a id="logo" class="nav-link" href="index.html">Tolerance Check</a>
-         <a id="coating" class="nav-link" href="kaplama.html">Coating Check</a>
-         <a id="olcer" class="nav-link" href="ramazan.html">Ölçer</a>
-      </nav>
-      <p>.</p>
-    <h1>Ortalama Kalınlık Hesaplama</h1>
-    <textarea id="tableInput" placeholder="Tabloyu sadece |43|51|45|39|47| şeklinde beş değerin sütunu olarak buraya yapıştırın..."></textarea>
-    <button onclick="updateTable()">Tabloyu Güncelle</button>
-    <p></p>
-    <table id="dataTable">
-        <thead>
-            <tr>
-                <th>Sol Üst Kaplama Kalınlığı</th>
-                <th>Sağ Üst Kaplama Kalınlığı</th>
-                <th>Orta Kaplama Kalınlığı</th>
-                <th>Sol Alt Kaplama Kalınlığı</th>
-                <th>Sağ Alt Kaplama Kalınlığı</th>
-                <th>Ortalama Değer</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Tablo verileri buraya eklenecek -->
-        </tbody>
-    </table>
 
-    <script>
-        function updateTable() {
-            const input = document.getElementById('tableInput').value.trim();
-            const rows = input.split('\n').map(row => row.split('\t'));
-            const tableBody = document.getElementById('dataTable').querySelector('tbody');
-            
-            // Tabloyu temizle
-            tableBody.innerHTML = '';
+<nav class="navbar">
+    <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="tolerans.html">Tolerans Hesaplama</a></li>
+        <li><a href="palet.html">Palet Verimliliği</a></li>
+        <li><a href="#" class="active">Kaplama Kalınlığı</a></li>
+        <li><a href="kayit.html">Ağırlık Tolerans Kayıt</a></li>
+    </ul>
+</nav>
 
-            rows.forEach(row => {
-                const tr = document.createElement('tr');
-                let sum = 0;
-                let count = 0;
+<div class="container">
+    <h2>🧪 Kaplama Kalınlığı Analizi</h2>
 
-                // İlk sütunu (Ürün) atlamak için index 1'den başlatıyoruz
-                row.slice(0).forEach((cell, index) => {
-                    const td = document.createElement('td');
-                    td.textContent = cell;
+    <div class="input-section">
+        <textarea id="tableInput" placeholder="|43|51|45|39|47| verilerini yapıştırın..."></textarea>
+        <div id="errorMsg"></div>
+        <div class="action-buttons">
+            <button class="btn btn-calc" onclick="updateTable()">Verileri Analiz Et</button>
+            <button id="copyBtn" class="btn btn-copy" onclick="copyAverages()">Ortalamaları Kopyala</button>
+        </div>
+    </div>
 
-                    // Ortalama hesaplama (sadece sayısal değerler için)
-                    if (index >= 0 && index < 5) {
-                        const value = parseFloat(cell);
-                        if (!isNaN(value)) {
-                            sum += value;
-                            count++;
-                        }
-                    }
-                    tr.appendChild(td).className = "prevent-select";
-                });
+    <div class="table-container">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Sol Üst Kaplama Kalınlığı</th>
+                    <th>Sağ Üst Kaplama Kalınlığı</th>
+                    <th>Orta Kaplama Kalınlığı</th>
+                    <th>Sol Alt Kaplama Kalınlığı</th>
+                    <th>Sağ Alt Kaplama Kalınlığı</th>
+                    <th class="avg-column">Ortalama Değer</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
-                // Ortalama sütununu ekle
-                const averageCell = document.createElement('td');
-                averageCell.textContent = count > 0 ? (sum / count).toFixed(2) : '-';
-                tr.appendChild(averageCell);
+<div id="copy-helper" style="position: absolute; left: -9999px;"></div>
 
-                tableBody.appendChild(tr);
-            });
+<footer>
+    <div class="footer-text">
+        © 2026 Kaplama Analiz Sistemi By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
+    </div>
+</footer>
+
+<script>
+    let currentAverages = [];
+
+    function updateTable() {
+        const input = document.getElementById('tableInput').value.trim();
+        const errorDiv = document.getElementById('errorMsg');
+        const tableBody = document.querySelector('#dataTable tbody');
+        const copyBtn = document.getElementById('copyBtn');
+        
+        errorDiv.style.display = 'none';
+        
+        if(!input) {
+            errorDiv.textContent = "❌ Lütfen veri girişini yapın.";
+            errorDiv.style.display = 'block';
+            return;
         }
-    </script>
+
+        const rows = input.split('\n').map(row => row.trim().split(/\s+/));
+        tableBody.innerHTML = ''; 
+        currentAverages = [];
+
+        for (let i = 0; i < rows.length; i++) {
+            const row = rows[i];
+            // | karakterlerini temizle ve boşlukları süz
+            const cleanData = row.map(v => v.replace(/[|]/g, "")).filter(v => v !== "");
+
+            // ZORUNLU KONTROL: 5 değer var mı?
+            if (cleanData.length < 5) {
+                errorDiv.textContent = `❌ Hata: ${i + 1}. satırda eksik veri var! 5 bölgenin de değeri girilmelidir.`;
+                errorDiv.style.display = 'block';
+                tableBody.innerHTML = '';
+                copyBtn.style.display = 'none';
+                return;
+            }
+
+            const tr = document.createElement('tr');
+            let sum = 0;
+
+            // İlk 5 değeri tabloya ekle
+            for (let j = 0; j < 5; j++) {
+                const td = document.createElement('td');
+                const val = cleanData[j];
+                td.textContent = val;
+                
+                const num = parseFloat(val);
+                if (isNaN(num)) {
+                    errorDiv.textContent = `❌ Hata: ${i + 1}. satırda geçersiz bir sayı tespit edildi!`;
+                    errorDiv.style.display = 'block';
+                    return;
+                }
+                sum += num;
+                tr.appendChild(td);
+            }
+
+            const avg = (sum / 5).toFixed(2);
+            currentAverages.push(avg);
+
+            const avgCell = document.createElement('td');
+            avgCell.className = "avg-column";
+            avgCell.textContent = avg;
+            tr.appendChild(avgCell);
+            tableBody.appendChild(tr);
+        }
+
+        copyBtn.style.display = 'block';
+    }
+
+    function copyAverages() {
+        if (currentAverages.length === 0) return;
+
+        let htmlContent = `<div style="font-family: 'Calibri', sans-serif; font-size: 10pt; font-weight: bold;">`;
+        currentAverages.forEach(val => {
+            htmlContent += `<div>${val}</div>`;
+        });
+        htmlContent += `</div>`;
+
+        const helper = document.getElementById('copy-helper');
+        helper.innerHTML = htmlContent;
+
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const plainText = currentAverages.join('\n');
+        const plainBlob = new Blob([plainText], { type: 'text/plain' });
+        
+        const data = [new ClipboardItem({ 
+            'text/html': blob,
+            'text/plain': plainBlob 
+        })];
+
+        navigator.clipboard.write(data).then(() => {
+            const btn = document.getElementById('copyBtn');
+            btn.textContent = "Kopyalandı! ✓";
+            setTimeout(() => { btn.textContent = "Ortalamaları Kopyala"; }, 2000);
+        });
+    }
+
+    // Ctrl + Enter kısayolu
+    document.getElementById('tableInput').addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.key === 'Enter') updateTable();
+    });
+</script>
 </body>
 </html>

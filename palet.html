@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalite Kontrol Araçları Kitaplığı</title>
+    <style>
+        /* NAVBAR STİLLERİ */
+        .navbar {
+            background-color: #1a73e8;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .nav-links a.active {
+            background-color: #ffffff;
+            color: #1a73e8;
+            font-weight: 700;
+        }
+
+        /* GENEL SAYFA AYARLARI */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            padding: 80px 20px 80px 20px; /* Üstten boşluk navbar için artırıldı */
+            margin: 0; 
+        }
+        
+        .container { background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); width: 100%; max-width: 950px; box-sizing: border-box; }
+        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+        
+        .header-section { margin-bottom: 20px; background: #f8f9fa; padding: 15px; border-radius: 8px; }
+        .main-layout { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 25px; }
+        
+        label { font-weight: 600; font-size: 13px; margin-bottom: 8px; color: #5f6368; display: block; }
+        textarea { 
+            width: 100%; height: 100px; padding: 12px; border: 1px solid #dadce0; border-radius: 6px; 
+            outline: none; resize: vertical; font-family: inherit; box-sizing: border-box;
+            background: #fffbe6;
+        }
+        
+        .results-box { 
+            background-color: #e8f0fe; padding: 20px; border-radius: 8px; 
+            border: 1px solid #d2e3fc; height: fit-content;
+        }
+
+        .horizontal-summary { 
+            margin-top: 25px; background: #fff; border: 1px solid #e0e0e0; 
+            border-radius: 8px; padding: 15px; overflow-x: auto; 
+        }
+        .summary-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .summary-table { border-collapse: collapse; min-width: 100%; }
+        
+        .summary-table th { 
+            background-color: #f8f9fa; color: #5f6368; font-size: 9pt; 
+            padding: 8px; border: 1px solid #ddd; white-space: nowrap;
+            font-family: Arial, sans-serif; text-align: center; font-weight: normal;
+        }
+        .summary-table td { 
+            border: 1px solid #ddd; padding: 12px; text-align: center; 
+            font-weight: normal; color: #000000; font-size: 9pt;
+            font-family: Arial, sans-serif;
+        }
+
+        .history-section { margin-top: 30px; border-top: 2px solid #eee; padding-top: 20px; }
+        .item { 
+            background: white; border: 1px solid #dadce0; border-radius: 8px; 
+            padding: 15px; margin-bottom: 12px;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px;
+        }
+        .item-title { grid-column: 1 / -1; color: #174ea6; font-weight: bold; border-bottom: 1px solid #eee; padding-bottom: 5px; }
+        .stat-group { display: flex; flex-direction: column; }
+        .stat-label { font-size: 11px; color: #777; text-transform: uppercase; }
+        .stat-value { font-weight: 700; font-size: 15px; color: #1a73e8; }
+
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; transition: 0.3s; margin-top: 10px; }
+        .btn-calc { background-color: #1a73e8; }
+        
+        .btn-copy { 
+            width: auto; margin: 0; padding: 6px 12px; font-size: 12px; 
+            background-color: #34a853; border-radius: 4px;
+        }
+
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
+            background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 20px; box-sizing: border-box; z-index: 1000;
+        }
+        .footer-text { font-size: 12px; color: #777; font-style: italic; }
+
+        /* Mobil Duyarlılık */
+        @media (max-width: 768px) {
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 11px; padding: 5px; }
+            .main-layout { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="tolerans.html">Tolerans Hesaplama</a></li>
+        <li><a href="#"class="active" >Palet Verimliliği</a></li>
+        <li><a href="kaplama.html">Kaplama Kalınlığı</a></li>
+        <li><a href="kayit.html">Ağırlık Tolerans Kayıt</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <h2>📦 Palet Verimliliği Hesaplama Aracı 📋</h2>
+    
+    <div class="main-layout">
+        <div class="header-section">
+            <label>Koli/Kutu Ölçülerini Girin (EnXBoyXYük)</label>
+            <textarea id="input" placeholder="Örn: 22,5x17,0x25,5 cm 25,5x15,0x24,5 cm"></textarea>
+            <button class="btn btn-calc" onclick="hesapla()">Hesapla ve Özetle</button>
+        </div>
+
+        <div class="results-box">
+            <h3 style="margin-top:0; color:#174ea6; font-size: 16px;">Analiz Bilgisi</h3>
+            <p style="font-size: 12px; color: #5f6368; line-height: 1.5;">
+                <strong>Palet:</strong> 120x100 cm<br>
+                <strong>Yükseklik:</strong> 180 cm
+            </p>
+        </div>
+    </div>
+
+    <div id="summaryArea" class="horizontal-summary" style="display:none;">
+        <div class="summary-header">
+            <h3 style="margin:0; color:#1a73e8; font-size: 14px;">📊 Hacim Verimlilik Özeti</h3>
+            <button class="btn btn-copy" onclick="copySummaryWithFormat()">Özeti Kopyala</button>
+        </div>
+        <table class="summary-table" id="ozetTablo">
+            <thead id="tabloKafa"></thead>
+            <tbody id="tabloGövde"></tbody>
+        </table>
+    </div>
+
+    <div class="history-section" id="sonucSection" style="display:none;">
+        <h3 style="font-size: 16px;">Analiz Detayları</h3>
+        <div id="sonuc"></div>
+    </div>
+</div>
+
+<footer>
+    <div class="footer-text">
+        © 2026 Palet Verimliliği Hesaplama Aracı By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
+    </div>
+</footer>
+
+<script>
+// Mevcut JavaScript fonksiyonların (parseAll, safeFloor, mixYerlesim, hesapla, copySummaryWithFormat) tamamen korunmuştur.
+function parseAll(text) {
+    text = text.toLowerCase().replace(/,/g, ".").replace(/cm/g, "");
+    const regex = /(\d+(\.\d+)?)x(\d+(\.\d+)?)x(\d+(\.\d+)?)/g;
+    let out = [], m;
+    while ((m = regex.exec(text)) !== null) {
+        out.push([+m[1], +m[3], +m[5]]);
+    }
+    return out;
+}
+
+function safeFloor(val) { return Math.floor(val + 0.0001); }
+
+function mixYerlesim(L, W) {
+    const PL = 120, PW = 100;
+    let nL = safeFloor(PL / L);
+    let nW = safeFloor(PW / W);
+    let main = nL * nW;
+    let remL = PL - nL * L;
+    let remW = PW - nW * W;
+    let side1 = safeFloor(remL / W) * safeFloor(PW / L);
+    let side2 = safeFloor(PL / W) * safeFloor(remW / L);
+    return main + side1 + side2;
+}
+
+function hesapla() {
+    const data = parseAll(document.getElementById("input").value);
+    if(data.length === 0) return;
+    
+    let detailHtml = "";
+    let headHtml = "<tr>";
+    let bodyHtml = "<tr>";
+    
+    data.forEach((d, i) => {
+        let [L, W, H] = d;
+        let opt1 = mixYerlesim(L, W);
+        let opt2 = mixYerlesim(W, L);
+        let best = (opt1 >= opt2) ? opt1 : opt2;
+        let yon = (opt1 >= opt2) ? `${L} x ${W}` : `${W} x ${L}`;
+        let kat = safeFloor(180 / H);
+        let toplam = best * kat;
+        let verim = ((toplam * L * W * H) / (120 * 100 * 180) * 100).toFixed(2);
+
+        headHtml += `<th>Ürün ${i+1}</th>`;
+        bodyHtml += `<td>${verim}</td>`;
+
+        detailHtml += `
+        <div class="item">
+            <div class="item-title">📦 Ürün ${i+1}: ${L}x${W}x${H}</div>
+            <div class="stat-group"><span class="stat-label">Yerleşim</span><span class="stat-value">${yon}</span></div>
+            <div class="stat-group"><span class="stat-label">Toplam Adet</span><span class="stat-value">${toplam}</span></div>
+            <div class="stat-group"><span class="stat-label">Hacim Verimi</span><span class="stat-value" style="color:#188038;">${verim}</span></div>
+        </div>`;
+    });
+
+    document.getElementById("summaryArea").style.display = "block";
+    document.getElementById("tabloKafa").innerHTML = headHtml + "</tr>";
+    document.getElementById("tabloGövde").innerHTML = bodyHtml + "</tr>";
+    document.getElementById("sonucSection").style.display = "block";
+    document.getElementById("sonuc").innerHTML = detailHtml;
+}
+
+function copySummaryWithFormat() {
+    const tableBody = document.getElementById("tabloGövde");
+    const cells = tableBody.getElementsByTagName("td");
+    
+    let htmlTable = '<table style="border-collapse:collapse;"><tr>';
+    let plainText = "";
+
+    for (let cell of cells) {
+        let val = cell.innerText;
+        htmlTable += `<td style="font-family:Arial; font-size:9pt; color:#000000; text-align:center; border:1px solid #ddd;">${val}</td>`;
+        plainText += val + "\t";
+    }
+    htmlTable += '</tr></table>';
+
+    const blobHtml = new Blob([htmlTable], { type: 'text/html' });
+    const blobText = new Blob([plainText.trim()], { type: 'text/plain' });
+    
+    const data = [new ClipboardItem({ 'text/html': blobHtml, 'text/plain': blobText })];
+
+    navigator.clipboard.write(data).then(() => {
+        const btn = document.querySelector(".btn-copy");
+        btn.innerText = "Formatlı Kopyalandı!";
+        btn.style.backgroundColor = "#1a73e8";
+        setTimeout(() => {
+            btn.innerText = "Özeti Kopyala";
+            btn.style.backgroundColor = "#34a853";
+        }, 2000);
+    });
+}
+</script>
+</body>
+</html>

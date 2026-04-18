@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tolerans Hesaplama Aracı</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f0f2f5; 
+            display: flex; 
+            justify-content: center; 
+            padding: 80px 20px 80px 20px; 
+            margin: 0; 
+        }
+
+        /* NAVBAR */
+        .navbar {
+            background-color: #1a73e8;
+            padding: 10px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-links {
+            display: flex;
+            gap: 20px;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 12px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .nav-links a:hover { background-color: rgba(255, 255, 255, 0.2); }
+        .nav-links a.active { background-color: #ffffff; color: #1a73e8; font-weight: 700; }
+
+        /* KONTEYNER */
+        .container { 
+            background: #fff; 
+            padding: 25px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            width: 100%; 
+            max-width: 550px; 
+            box-sizing: border-box; 
+        }
+
+        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
+
+        .input-group { margin-bottom: 15px; }
+        label { font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #5f6368; display: block; }
+        
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #dadce0; 
+            border-radius: 6px; 
+            outline: none; 
+            font-family: inherit; 
+            box-sizing: border-box;
+            transition: border 0.3s;
+        }
+        input:focus { border-color: #1a73e8; box-shadow: 0 0 5px rgba(26,115,232,0.2); }
+
+        .tolerance-control { display: flex; gap: 10px; align-items: center; }
+        .tol-btn { 
+            background: #f1f3f4; 
+            border: 1px solid #dadce0; 
+            padding: 8px 15px; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            font-weight: bold; 
+        }
+
+        .btn-calc { 
+            width: 100%; 
+            padding: 14px; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            color: white; 
+            background-color: #1a73e8; 
+            font-size: 16px;
+            margin-top: 10px;
+        }
+
+        /* SONUÇ ALANI */
+        .result-box {
+            margin-top: 25px;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 15px;
+            display: none;
+            border: 1px solid #eee;
+            line-height: 1.6;
+        }
+        .tolerance-inside { background-color: #e6f4ea; color: #1e8e3e; border-color: #ceead6; }
+        .tolerance-outside { background-color: #fce8e6; color: #d93025; border-color: #fad2cf; }
+        
+        .dim-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.03); }
+        .dim-label { font-weight: bold; }
+
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
+            background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 20px; box-sizing: border-box; z-index: 1000;
+        }
+        .footer-text { font-size: 12px; color: #777; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="#" class="active">Tolerans Hesaplama</a></li>
+        <li><a href="palet.html">Palet Verimliliği</a></li>
+        <li><a href="kaplama.html">Kaplama Kalınlığı</a></li>
+        <li><a href="kayit.html">Ağırlık Tolerans Kayıt</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <h2>📏 Tolerans Hesaplama Aracı</h2>
+
+    <div class="input-group">
+        <label>Referans Değer (IDS)</label>
+        <input type="text" id="idsInput" placeholder="Örn: 18.5 veya 18.5x25.0x31.5">
+    </div>
+
+    <div class="input-group">
+        <label>Ölçülen Değer (Ürün)</label>
+        <input type="text" id="prodInput" placeholder="Referansla aynı formatta girin">
+    </div>
+
+    <div class="input-group">
+        <label>Tolerans Oranı (%)</label>
+        <div class="tolerance-control">
+            <button class="tol-btn" onclick="adjustTol(-1)">-</button>
+            <input type="number" id="tolerance" value="5" style="text-align: center;">
+            <button class="tol-btn" onclick="adjustTol(1)">+</button>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label>Birim</label>
+        <select id="unit">
+            <option value="mm">mm</option>
+            <option value="cm">cm</option>
+            <option value="inch">inch</option>
+            <option value="gr">gr</option>
+            <option value="kg">kg</option>
+        </select>
+    </div>
+
+    <button class="btn-calc" onclick="checkSmartTolerance()">Kontrol Et</button>
+
+    <div id="result" class="result-box"></div>
+</div>
+
+<footer>
+    <div class="footer-text">
+        © 2026 Tolerans Hesaplama Aracı By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
+    </div>
+</footer>
+
+<script>
+    function adjustTol(val) {
+        let input = document.getElementById('tolerance');
+        let current = parseFloat(input.value) || 0;
+        if (current + val >= 0) input.value = current + val;
+    }
+
+    function parseValue(val) {
+        val = val.toLowerCase().replace(/,/g, ".");
+        if (val.includes('x')) {
+            return val.split('x').map(item => parseFloat(item.trim()));
+        }
+        return [parseFloat(val)];
+    }
+
+    function checkSmartTolerance() {
+        const idsRaw = document.getElementById('idsInput').value;
+        const prodRaw = document.getElementById('prodInput').value;
+        const tolPercent = parseFloat(document.getElementById('tolerance').value);
+        const unit = document.getElementById('unit').value;
+        const resultDiv = document.getElementById('result');
+
+        const idsArray = parseValue(idsRaw);
+        const prodArray = parseValue(prodRaw);
+
+        if (idsArray.length !== prodArray.length || idsArray.some(isNaN) || prodArray.some(isNaN)) {
+            resultDiv.style.display = "block";
+            resultDiv.className = "result-box";
+            resultDiv.innerHTML = "❌ <b>Hata:</b> Girdi formatları birbiriyle eşleşmiyor veya geçersiz sayı girildi.";
+            return;
+        }
+
+        let allInside = true;
+        let reportHtml = "";
+        const labels = ["En", "Boy", "Yükseklik"];
+
+        idsArray.forEach((ids, index) => {
+            const prod = prodArray[index];
+            const tolAmount = ids * (tolPercent / 100);
+            const lower = ids - tolAmount;
+            const upper = ids + tolAmount;
+            
+            let status = "";
+            let diffText = "";
+            const currentLabel = idsArray.length > 1 ? (labels[index] || `Ölçü ${index+1}`) : "Ölçüm";
+
+            if (prod < lower) {
+                allInside = false;
+                status = `<span style="color:#d93025; font-weight:bold;">Dışı (Düşük)</span>`;
+                diffText = `-${(lower - prod).toFixed(3)} ${unit}`;
+            } else if (prod > upper) {
+                allInside = false;
+                status = `<span style="color:#d93025; font-weight:bold;">Dışı (Yüksek)</span>`;
+                diffText = `+${(prod - upper).toFixed(3)} ${unit}`;
+            } else {
+                status = `<span style="color:#1e8e3e; font-weight:bold;">Uygun</span>`;
+                const perc = (((prod - ids) / ids) * 100).toFixed(2);
+                diffText = `${perc >= 0 ? '+' : ''}${perc}%`;
+            }
+
+            reportHtml += `
+                <div class="dim-item">
+                    <span class="dim-label">${currentLabel}:</span>
+                    <span>${prod} ${unit} | ${status} (${diffText})</span>
+                </div>`;
+        });
+
+        resultDiv.style.display = "block";
+        resultDiv.className = "result-box " + (allInside ? "tolerance-inside" : "tolerance-outside");
+        
+        let header = allInside ? "✅ Tüm Ölçümler Uygun" : "⚠️ Tolerans Dışı Ölçüm Tespit Edildi";
+        resultDiv.innerHTML = `<div style="text-align:center; font-weight:bold; margin-bottom:10px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:5px;">${header}</div>` + reportHtml;
+    }
+
+    document.addEventListener('keydown', (e) => { if(e.key === 'Enter') checkSmartTolerance(); });
+</script>
+</body>
+</html>
