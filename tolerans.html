@@ -3,155 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tolerans Hesaplama Aracı</title>
+    <title>Tolerans Analiz Sistemi - Kalite Kontrol</title>
     <style>
+        /* DASHBOARD İLE EŞLEŞTİRİLMİŞ GENEL STİLLER */
         body { 
             font-family: 'Segoe UI', sans-serif; 
             background-color: #f0f2f5; 
-            display: flex; 
-            justify-content: center; 
-            padding: 80px 20px 80px 20px; 
             margin: 0; 
+            padding: 80px 20px 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-/* NAVBAR GENEL */
-.navbar {
-    background-color: #1a73e8;
-    padding: 5px 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 2000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
+        /* NAVBAR GENEL (DASHBOARDDAN ALINDI) */
+        .navbar {
+            background-color: #1a73e8;
+            padding: 5px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-.nav-links {
-    display: flex;
-    gap: 10px;
-    list-style: none;
-    margin: 0;
-    padding: 5px 10px;
-    flex-wrap: wrap;
-    justify-content: center;
-}
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+            margin: 0;
+            padding: 5px 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
 
-/* BUTONLARIN NORMAL HALİ */
-.nav-links a {
-    color: rgba(255, 255, 255, 0.8); /* Normalde biraz şeffaf beyaz */
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: 500;
-    padding: 8px 15px;
-    border-radius: 5px;
-    transition: all 0.3s ease;
-    white-space: nowrap;
-}
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
 
-/* MOUSE ÜZERİNE GELİNCE (HOVER) - PC İÇİN */
-.nav-links a:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-    color: white;
-}
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
 
-/* AKTİF SAYFA RENGİ (BEYAZ BUTON) */
-.nav-links a.active {
-    background-color: #ffffff !important; /* Beyaz arka plan */
-    color: #1a73e8 !important;         /* Mavi yazı */
-    font-weight: 700;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
+        .nav-links a.active {
+            background-color: #ffffff !important;
+            color: #1a73e8 !important;
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
 
-/* MOBİL ÖZEL AYARLAR */
-@media (max-width: 600px) {
-    body {
-        padding-top: 110px; /* Navbar 2 satıra çıkarsa diye mesafe */
-    }
-    
-    .nav-links {
-        gap: 5px;
-    }
+        /* MOBİL ÖZEL AYARLAR */
+        @media (max-width: 600px) {
+            body { padding-top: 110px; }
+            .nav-links { gap: 5px; }
+            .nav-links a { font-size: 12px; padding: 6px 10px; }
+        }
 
-    .nav-links a {
-        font-size: 12px;
-        padding: 6px 10px;
-    }
-    
-    /* Mobilde aktif butonun çok parlamaması için (isteğe bağlı) */
-    .nav-links a.active {
-        box-shadow: none;
-    }
-}
-        /* KONTEYNER */
+        /* ARAÇ ÖZELİNDE KONTEYNER TASARIMI */
         .container { 
             background: #fff; 
-            padding: 25px; 
+            padding: 30px; 
             border-radius: 12px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
             width: 100%; 
-            max-width: 550px; 
+            max-width: 750px; 
             box-sizing: border-box; 
+            margin-top: 20px;
+            border: 1px solid #e0e0e0;
         }
-
-        h2 { text-align: center; color: #1a73e8; margin-bottom: 20px; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px; }
-
-        .input-group { margin-bottom: 15px; }
-        label { font-weight: 600; font-size: 13px; margin-bottom: 6px; color: #5f6368; display: block; }
         
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            border: 1px solid #dadce0; 
-            border-radius: 6px; 
-            outline: none; 
-            font-family: inherit; 
-            box-sizing: border-box;
-            transition: border 0.3s;
-        }
-        input:focus { border-color: #1a73e8; box-shadow: 0 0 5px rgba(26,115,232,0.2); }
-
-        .tolerance-control { display: flex; gap: 10px; align-items: center; }
-        .tol-btn { 
-            background: #f1f3f4; 
-            border: 1px solid #dadce0; 
-            padding: 8px 15px; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-weight: bold; 
-        }
-
-        .btn-calc { 
-            width: 100%; 
-            padding: 14px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: bold; 
-            color: white; 
-            background-color: #1a73e8; 
-            font-size: 16px;
-            margin-top: 10px;
-        }
-
-        /* SONUÇ ALANI */
-        .result-box {
-            margin-top: 25px;
-            padding: 15px;
-            border-radius: 8px;
-            font-size: 15px;
-            display: none;
-            border: 1px solid #eee;
-            line-height: 1.6;
-        }
-        .tolerance-inside { background-color: #e6f4ea; color: #1e8e3e; border-color: #ceead6; }
-        .tolerance-outside { background-color: #fce8e6; color: #d93025; border-color: #fad2cf; }
+        h2 { text-align: center; color: #1a73e8; margin-top: 0; margin-bottom: 25px; }
         
-        .dim-item { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(0,0,0,0.03); }
-        .dim-label { font-weight: bold; }
+        .input-group { margin-bottom: 20px; }
+        label { font-weight: 600; font-size: 13px; color: #5f6368; display: block; margin-bottom: 8px; }
+        input, select, textarea { width: 100%; padding: 12px; border: 1px solid #dadce0; border-radius: 8px; box-sizing: border-box; font-size: 14px; outline: none; transition: border 0.3s; }
+        input:focus, textarea:focus { border-color: #1a73e8; }
+        textarea { height: 120px; font-family: 'Courier New', monospace; }
+        
+        .tol-container { display: flex; gap: 10px; align-items: center; }
+        .tol-btn { background: #e8f0fe; border: 1px solid #1a73e8; color: #1a73e8; padding: 10px 20px; cursor: pointer; font-weight: bold; border-radius: 6px; transition: 0.2s; }
+        .tol-btn:hover { background: #d2e3fc; }
+        
+        .btn-calc { width: 100%; padding: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; background-color: #1a73e8; font-size: 16px; margin-top: 10px; transition: 0.3s; }
+        .btn-calc:hover { background-color: #1557b0; box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
 
+        /* SONUÇ KUTULARI */
+        .result-box { margin-top: 25px; padding: 20px; border-radius: 10px; display: none; border: 1px solid #dadce0; }
+        .tolerance-inside { border-left: 10px solid #1e8e3e; background-color: #f8fff9; }
+        .tolerance-outside { border-left: 10px solid #d93025; background-color: #fff8f8; }
+        
+        .res-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        .diff-text { font-size: 11px; margin-left: 8px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .diff-plus { background: #fce8e6; color: #d93025; }
+        .diff-minus { background: #e8f0fe; color: #1a73e8; }
+        .diff-zero { background: #e6f4ea; color: #1e8e3e; }
+
+        .avg-section { background: #fff; padding: 15px; border-radius: 8px; margin-top: 20px; border: 2px solid #1a73e8; }
+        .summary-header { font-weight: bold; color: #1a73e8; margin-bottom: 10px; display: block; text-align: center; font-size: 16px; }
+
+        /* FOOTER (DASHBOARDDAN ALINDI) */
         footer {
             position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
             background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
@@ -170,129 +132,157 @@
         <li><a href="#" class="active">Tolerans Hesaplama</a></li>
         <li><a href="palet.html">Palet Verimliliği</a></li>
         <li><a href="kaplama.html">Kaplama Kalınlığı</a></li>
+        <li><a href="klasor.html">Klasör Hazırlayıcı</a></li>
         <li><a href="kayit.html">Ağırlık Tolerans Kayıt</a></li>
     </ul>
 </nav>
 
 <div class="container">
-    <h2>📏 Tolerans Hesaplama Aracı</h2>
+    <h2>📏 Tolerans Analiz Aracı</h2>
 
     <div class="input-group">
-        <label>Referans Değer (IDS)</label>
-        <input type="text" id="idsInput" placeholder="Örn: 18.5 veya 18.5x25.0x31.5">
+        <label>Birim Seçimi</label>
+        <select id="unit" onchange="updatePlaceholders()">
+            <option value="gr">gr (Ağırlık)</option>
+            <option value="kg">kg (Ağırlık)</option>
+            <option value="mm">mm (Boyut)</option>
+            <option value="cm">cm (Boyut)</option>
+            <option value="inch">inch (Boyut)</option>
+        </select>
     </div>
 
     <div class="input-group">
-        <label>Ölçülen Değer (Ürün)</label>
-        <input type="text" id="prodInput" placeholder="Referansla aynı formatta girin">
+        <label>Referans Değer (IDS)</label>
+        <input type="text" id="idsInput">
+    </div>
+
+    <div class="input-group">
+        <label>Ölçülen Değerler</label>
+        <textarea id="prodInput"></textarea>
     </div>
 
     <div class="input-group">
         <label>Tolerans Oranı (%)</label>
-        <div class="tolerance-control">
-            <button class="tol-btn" onclick="adjustTol(-1)">-</button>
-            <input type="number" id="tolerance" value="5" style="text-align: center;">
-            <button class="tol-btn" onclick="adjustTol(1)">+</button>
+        <div class="tol-container">
+            <button class="tol-btn" onclick="changeTol(-1)">-1</button>
+            <input type="number" id="tolerance" value="5" style="text-align: center; font-weight: bold;">
+            <button class="tol-btn" onclick="changeTol(1)">+1</button>
         </div>
     </div>
 
-    <div class="input-group">
-        <label>Birim</label>
-        <select id="unit">
-            <option value="mm">mm</option>
-            <option value="cm">cm</option>
-            <option value="inch">inch</option>
-            <option value="gr">gr</option>
-            <option value="kg">kg</option>
-        </select>
-    </div>
-
-    <button class="btn-calc" onclick="checkSmartTolerance()">Kontrol Et</button>
-
+    <button class="btn-calc" onclick="startQC()">Analizi Başlat</button>
     <div id="result" class="result-box"></div>
 </div>
 
 <footer>
     <div class="footer-text">
-        © 2026 Tolerans Hesaplama Aracı By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
+        © 2026 Kalite Kontrol Dashboard By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
     </div>
 </footer>
 
 <script>
-    function adjustTol(val) {
-        let input = document.getElementById('tolerance');
-        let current = parseFloat(input.value) || 0;
-        if (current + val >= 0) input.value = current + val;
-    }
+    window.onload = updatePlaceholders;
 
-    function parseValue(val) {
-        val = val.toLowerCase().replace(/,/g, ".");
-        if (val.includes('x')) {
-            return val.split('x').map(item => parseFloat(item.trim()));
-        }
-        return [parseFloat(val)];
-    }
-
-    function checkSmartTolerance() {
-        const idsRaw = document.getElementById('idsInput').value;
-        const prodRaw = document.getElementById('prodInput').value;
-        const tolPercent = parseFloat(document.getElementById('tolerance').value);
+    function updatePlaceholders() {
         const unit = document.getElementById('unit').value;
-        const resultDiv = document.getElementById('result');
-
-        const idsArray = parseValue(idsRaw);
-        const prodArray = parseValue(prodRaw);
-
-        if (idsArray.length !== prodArray.length || idsArray.some(isNaN) || prodArray.some(isNaN)) {
-            resultDiv.style.display = "block";
-            resultDiv.className = "result-box";
-            resultDiv.innerHTML = "❌ <b>Hata:</b> Girdi formatları birbiriyle eşleşmiyor veya geçersiz sayı girildi.";
-            return;
+        const idsInp = document.getElementById('idsInput');
+        const prodInp = document.getElementById('prodInput');
+        
+        if (unit === 'gr' || unit === 'kg') {
+            idsInp.placeholder = `Örn: 500`;
+            prodInp.placeholder = `498\n502\n505`;
+        } else {
+            idsInp.placeholder = `Örn: 10x20x32`;
+            prodInp.placeholder = `10.1x19.8x32.1\n9.9x20.2x31.8`;
         }
+    }
 
+    function changeTol(v) {
+        let el = document.getElementById('tolerance');
+        let current = parseFloat(el.value) || 0;
+        if(current + v >= 0) el.value = current + v;
+    }
+
+    function cleanAndSplit(text) {
+        return text.toLowerCase().replace(/,/g, ".").split(/[\s,x]+/).map(n => parseFloat(n)).filter(n => !isNaN(n));
+    }
+
+    function startQC() {
+        const idsRaw = document.getElementById('idsInput').value.trim();
+        const prodRaw = document.getElementById('prodInput').value.trim();
+        const tolPerc = parseFloat(document.getElementById('tolerance').value);
+        const unit = document.getElementById('unit').value;
+        const resDiv = document.getElementById('result');
+
+        if(!idsRaw || !prodRaw) { alert("Lütfen veri girin!"); return; }
+
+        const idsSet = cleanAndSplit(idsRaw);
+        const samples = prodRaw.split(/\n/).map(s => s.trim()).filter(s => s !== "");
+        const isWeight = (unit === 'gr' || unit === 'kg');
+        
         let allInside = true;
         let reportHtml = "";
-        const labels = ["En", "Boy", "Yükseklik"];
+        let totals = new Array(idsSet.length).fill(0);
+        let validCount = 0;
 
-        idsArray.forEach((ids, index) => {
-            const prod = prodArray[index];
-            const tolAmount = ids * (tolPercent / 100);
-            const lower = ids - tolAmount;
-            const upper = ids + tolAmount;
-            
-            let status = "";
-            let diffText = "";
-            const currentLabel = idsArray.length > 1 ? (labels[index] || `Ölçü ${index+1}`) : "Ölçüm";
-
-            if (prod < lower) {
+        samples.forEach((sample, idx) => {
+            const currentVals = cleanAndSplit(sample);
+            if (currentVals.length !== idsSet.length) {
                 allInside = false;
-                status = `<span style="color:#d93025; font-weight:bold;">Dışı (Düşük)</span>`;
-                diffText = `-${(lower - prod).toFixed(3)} ${unit}`;
-            } else if (prod > upper) {
-                allInside = false;
-                status = `<span style="color:#d93025; font-weight:bold;">Dışı (Yüksek)</span>`;
-                diffText = `+${(prod - upper).toFixed(3)} ${unit}`;
-            } else {
-                status = `<span style="color:#1e8e3e; font-weight:bold;">Uygun</span>`;
-                const perc = (((prod - ids) / ids) * 100).toFixed(2);
-                diffText = `${perc >= 0 ? '+' : ''}${perc}%`;
+                reportHtml += `<div class="res-item" style="color:#d93025; background:#fff0f0;"><span>${idx+1}. Örnek:</span> <span>Hatalı Format</span></div>`;
+                return;
             }
 
+            validCount++;
+            let rowInside = true;
+            let rowDetail = "";
+
+            currentVals.forEach((val, i) => {
+                const ref = idsSet[i];
+                const diffVal = val - ref;
+                const tolAmount = ref * (tolPerc / 100);
+                const ok = (val >= ref - tolAmount && val <= ref + tolAmount);
+                if(!ok) { rowInside = false; allInside = false; }
+                totals[i] += val;
+
+                let diffClass = diffVal > 0 ? 'diff-plus' : (diffVal < 0 ? 'diff-minus' : 'diff-zero');
+                let sign = diffVal > 0 ? '+' : '';
+                let diffText = `<span class="diff-text ${diffClass}">${sign}${diffVal.toFixed(2)} ${unit}</span>`;
+
+                rowDetail += `<div style="margin-bottom:4px;">${val} ${unit} ${diffText}</div>`;
+            });
+
             reportHtml += `
-                <div class="dim-item">
-                    <span class="dim-label">${currentLabel}:</span>
-                    <span>${prod} ${unit} | ${status} (${diffText})</span>
+                <div class="res-item">
+                    <div><b>${idx+1}. Ölçüm:</b><br>${rowDetail}</div>
+                    <span style="color:${rowInside ? '#1e8e3e' : '#d93025'}; font-weight:bold; min-width:80px; text-align:right;">
+                        ${rowInside ? '✔ UYGUN' : '✘ DIŞI'}
+                    </span>
                 </div>`;
         });
 
-        resultDiv.style.display = "block";
-        resultDiv.className = "result-box " + (allInside ? "tolerance-inside" : "tolerance-outside");
-        
-        let header = allInside ? "✅ Tüm Ölçümler Uygun" : "⚠️ Tolerans Dışı Ölçüm Tespit Edildi";
-        resultDiv.innerHTML = `<div style="text-align:center; font-weight:bold; margin-bottom:10px; border-bottom:1px solid rgba(0,0,0,0.1); padding-bottom:5px;">${header}</div>` + reportHtml;
-    }
+        if (isWeight && validCount > 0) {
+            let avgHtml = `<div class="avg-section"><span class="summary-header">📊 ANALİZ ÖZETİ</span>`;
+            totals.forEach((sum, i) => {
+                const avg = sum / validCount;
+                const ref = idsSet[i];
+                const avgDiff = avg - ref;
+                const tol = ref * (tolPerc / 100);
+                const isAvgOk = (avg >= ref - tol && avg <= ref + tol);
+                
+                let sign = avgDiff > 0 ? '+' : '';
+                avgHtml += `<div class="res-item">
+                    <span>Ortalama: <b>${avg.toFixed(3)} ${unit}</b> (Sapma: ${sign}${avgDiff.toFixed(3)})</span> 
+                    <span style="font-weight:bold; color:${isAvgOk ? '#1e8e3e' : '#d93025'}">${isAvgOk ? 'UYGUN' : 'DIŞI'}</span>
+                </div>`;
+            });
+            reportHtml += avgHtml + `</div>`;
+        }
 
-    document.addEventListener('keydown', (e) => { if(e.key === 'Enter') checkSmartTolerance(); });
+        resDiv.style.display = "block";
+        resDiv.className = `result-box ${allInside ? 'tolerance-inside' : 'tolerance-outside'}`;
+        resDiv.innerHTML = `<div style="text-align:center; font-weight:bold; margin-bottom:15px;">${allInside ? '✅ TEST BAŞARILI' : '⚠️ HATALI DEĞERLER VAR'}</div>` + reportHtml;
+    }
 </script>
 </body>
 </html>

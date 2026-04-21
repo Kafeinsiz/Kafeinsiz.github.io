@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Klasör Hazırlama Otomasyonu - Kalite Kontrol</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* DASHBOARD İLE AYNI TEMEL TASARIM */
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background-color: #f0f2f5; 
+            margin: 0; 
+            padding: 80px 20px 60px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* NAVBAR - DASHBOARDDAN BİREBİR ALINDI */
+        .navbar {
+            background-color: #1a73e8;
+            padding: 5px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+            margin: 0;
+            padding: 5px 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        .nav-links a.active {
+            background-color: #ffffff !important;
+            color: #1a73e8 !important;
+            font-weight: 700;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* CONTAINER - DASHBOARD KART TASARIMIYLA UYUMLU */
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            width: 100%;
+            max-width: 850px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+            box-sizing: border-box;
+        }
+
+        h1 { color: #1a73e8; text-align: center; margin-top: 0; margin-bottom: 10px; }
+        .subtitle { color: #5f6368; text-align: center; font-size: 14px; margin-bottom: 25px; }
+
+        /* FORM ELEMANLARI */
+        .input-group { margin-bottom: 20px; }
+        label { font-weight: 600; font-size: 13px; color: #5f6368; display: block; margin-bottom: 8px; }
+        textarea { 
+            width: 100%; padding: 15px; border: 1px solid #dadce0; border-radius: 8px; 
+            box-sizing: border-box; font-size: 14px; outline: none; height: 180px;
+            font-family: 'Courier New', monospace; transition: border 0.3s;
+        }
+        textarea:focus { border-color: #1a73e8; }
+
+        /* SÜTUN SEÇİM ALANI */
+        .selection-panel {
+            background: #f8faff; border: 1px dashed #1a73e8; border-radius: 8px;
+            padding: 20px; margin: 20px 0; display: none;
+        }
+        .sel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        select { 
+            width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #dadce0;
+            font-size: 14px; background: white; outline: none;
+        }
+
+        /* BUTONLAR */
+        .btn { 
+            width: 100%; padding: 15px; border: none; border-radius: 8px; 
+            cursor: pointer; font-weight: 700; font-size: 15px; transition: all 0.3s;
+            margin-top: 10px;
+        }
+        .btn-primary { background: #1a73e8; color: white; }
+        .btn-primary:hover { background: #1557b0; box-shadow: 0 4px 12px rgba(26,115,232,0.3); }
+        
+        .btn-success { background: #1e8e3e; color: white; display: none; }
+        .btn-success:hover { background: #187130; }
+
+        .btn-clear { background: #f1f3f4; color: #5f6368; margin-top: 15px; font-size: 13px; padding: 10px; }
+        .btn-clear:hover { background: #e8eaed; }
+
+        /* SONUÇ LİSTESİ */
+        .result-box { 
+            margin-top: 20px; border: 1px solid #e0e0e0; border-radius: 8px; 
+            max-height: 250px; overflow-y: auto; display: none; background: #fafafa;
+        }
+        .folder-item { 
+            padding: 10px 15px; border-bottom: 1px solid #eee; font-size: 13px; 
+            color: #3c4043; font-family: monospace;
+        }
+        .folder-item:last-child { border-bottom: none; }
+
+        /* FOOTER - DASHBOARDDAN BİREBİR ALINDI */
+        footer {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 35px;
+            background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(5px);
+            border-top: 1px solid rgba(0, 0, 0, 0.05);
+            display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 20px; box-sizing: border-box; z-index: 1000;
+        }
+        .footer-text { font-size: 12px; color: #777; font-style: italic; }
+
+        @media (max-width: 600px) {
+            body { padding-top: 110px; }
+            .sel-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <ul class="nav-links">
+        <li><a href="index.html">Ana Sayfa</a></li>
+        <li><a href="tolerans.html">Tolerans Hesaplama</a></li>
+        <li><a href="palet.html">Palet Verimliliği</a></li>
+        <li><a href="kaplama.html">Kaplama Kalınlığı</a></li>
+	<li><a href="#" class="active">Klasör Hazırlayıcı</a></li>
+        <li><a href="kayit.html">Ağırlık Tolerans Kayıt</a></li>        
+    </ul>
+</nav>
+
+<div class="container">
+    <h1>📁 Klasör Hazırlama Otomasyonu</h1>
+    <p class="subtitle">Tablonuzdaki verileri akıllıca ayıklar ve klasör yapınızı saniyeler içinde hazırlar.</p>
+
+    <div class="input-group">
+        <label>Excel Tablosunu Buraya Yapıştırın</label>
+        <textarea id="rawInput" placeholder="Madde Kodu, Ürün Adı, Barkod vb. içeren tablonuzu kopyalayıp buraya yapıştırın..."></textarea>
+    </div>
+
+    <button class="btn btn-primary" onclick="analyzeTable()">1. Tabloyu Analiz Et</button>
+
+    <div id="selectionPanel" class="selection-panel">
+        <div style="font-weight: 700; color: #1a73e8; margin-bottom: 15px; font-size: 14px;">Eşleştirilecek Sütunları Seçin:</div>
+        <div class="sel-grid">
+            <div class="sel-item">
+                <label>Madde Kodu Sütunu</label>
+                <select id="codeSelect"></select>
+            </div>
+            <div class="sel-item">
+                <label>Ürün Adı Sütunu</label>
+                <select id="nameSelect"></select>
+            </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top: 20px;" onclick="generateList()">2. Klasör Listesini Oluştur</button>
+    </div>
+
+    <div id="resultBox" class="result-box">
+        <div id="resultContent"></div>
+    </div>
+
+    <button id="zipBtn" class="btn btn-success" onclick="downloadZip()">3. ZIP Olarak İndir (.zip)</button>
+    
+    <button class="btn btn-clear" onclick="window.location.reload()">Sayfayı Sıfırla</button>
+</div>
+
+<footer>
+    <div class="footer-text">
+        © 2026 Kalite Kontrol Dashboard By <a href="https://www.github.com/kafeinsiz" target="_blank" style="color:#1a73e8; text-decoration:none;">Kafeinsiz</a>
+    </div>
+</footer>
+
+<script>
+    let rawLines = [];
+    let folderNames = [];
+
+    function analyzeTable() {
+        const input = document.getElementById('rawInput').value.trim();
+        if (!input) { alert("Lütfen tablo verisi girin."); return; }
+
+        const lines = input.split(/\n/);
+        const headers = lines[0].split(/\t/); // Excel tab karakteri ayrımı
+
+        const codeSel = document.getElementById('codeSelect');
+        const nameSel = document.getElementById('nameSelect');
+        
+        codeSel.innerHTML = "";
+        nameSel.innerHTML = "";
+
+        headers.forEach((h, i) => {
+            let title = h.trim() || `${i+1}. Sütun`;
+            let opt = `<option value="${i}">${title}</option>`;
+            codeSel.innerHTML += opt;
+            nameSel.innerHTML += opt;
+        });
+
+        // Akıllı Tahmin (Başlığa göre otomatik seçme)
+        headers.forEach((h, i) => {
+            let low = h.toLowerCase();
+            if (low.includes("madde") || low.includes("kod")) codeSel.value = i;
+            if (low.includes("ürün") || low.includes("urun") || low.includes("ad") || low.includes("tanım")) nameSel.value = i;
+        });
+
+        document.getElementById('selectionPanel').style.display = "block";
+        rawLines = lines;
+    }
+
+    function generateList() {
+        const cIdx = document.getElementById('codeSelect').value;
+        const nIdx = document.getElementById('nameSelect').value;
+        const resBox = document.getElementById('resultBox');
+        const resContent = document.getElementById('resultContent');
+        const zipBtn = document.getElementById('zipBtn');
+
+        folderNames = [];
+        resContent.innerHTML = "";
+        let count = 1;
+
+        // Başlık satırını atlayarak (i=1) başla
+        for (let i = 1; i < rawLines.length; i++) {
+            const cols = rawLines[i].split(/\t/);
+            if (cols.length <= Math.max(cIdx, nIdx)) continue;
+
+            let code = cols[cIdx].trim();
+            let name = cols[nIdx].trim();
+
+            if (code && name) {
+                let folderName = `${count})${code} ${name}`;
+                folderNames.push(folderName);
+                resContent.innerHTML += `<div class="folder-item">${folderName}</div>`;
+                count++;
+            }
+        }
+
+        if (folderNames.length > 0) {
+            resBox.style.display = "block";
+            zipBtn.style.display = "block";
+            resBox.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alert("Uygun veri bulunamadı. Lütfen sütun seçimlerini kontrol edin.");
+        }
+    }
+
+    async function downloadZip() {
+        const zip = new JSZip();
+        const mainFolder = zip.folder("Urun_Klasorleri");
+
+        folderNames.forEach(name => {
+            // İşletim sistemi için geçersiz karakterleri temizle
+            let safeName = name.replace(/[<>:"/\\|?*]/g, '');
+            mainFolder.folder(safeName);
+        });
+
+        const content = await zip.generateAsync({type: "blob"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(content);
+        link.download = "Uretim_Klasor_Yapisi.zip";
+        link.click();
+    }
+</script>
+
+</body>
+</html>
