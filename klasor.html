@@ -147,7 +147,7 @@
         <li><a href="tolerans.html">Tolerans Hesaplama</a></li>
         <li><a href="palet.html">Palet Verimliliği</a></li>
         <li><a href="kaplama.html">Kaplama Kalınlığı</a></li>
-	<li><a href="#" class="active">Klasör Hazırlayıcı</a></li>
+        <li><a href="#" class="active">Klasör Hazırlayıcı</a></li>
         <li><a href="kayit.html">Ağırlık Tolerans Kayıt</a></li>        
     </ul>
 </nav>
@@ -202,7 +202,7 @@
         if (!input) { alert("Lütfen tablo verisi girin."); return; }
 
         const lines = input.split(/\n/);
-        const headers = lines[0].split(/\t/); // Excel tab karakteri ayrımı
+        const headers = lines[0].split(/\t/);
 
         const codeSel = document.getElementById('codeSelect');
         const nameSel = document.getElementById('nameSelect');
@@ -217,11 +217,19 @@
             nameSel.innerHTML += opt;
         });
 
-        // Akıllı Tahmin (Başlığa göre otomatik seçme)
+        // Akıllı Tahmin ve Önceliklendirme Mantığı
         headers.forEach((h, i) => {
-            let low = h.toLowerCase();
-            if (low.includes("madde") || low.includes("kod")) codeSel.value = i;
-            if (low.includes("ürün") || low.includes("urun") || low.includes("ad") || low.includes("tanım")) nameSel.value = i;
+            let low = h.toLowerCase().trim();
+            
+            // 1. Sütun Öncelikleri (Madde Kodu, Ürün No, Malzeme Kodu)
+            if (low.includes("madde kodu") || low.includes("ürün no") || low.includes("urun no") || low.includes("malzeme kodu")) {
+                codeSel.value = i;
+            }
+            
+            // 2. Sütun Öncelikleri (Madde Adı, Ürün Adı)
+            if (low.includes("madde adı") || low.includes("madde adi") || low.includes("ürün adı") || low.includes("urun adi")) {
+                nameSel.value = i;
+            }
         });
 
         document.getElementById('selectionPanel').style.display = "block";
@@ -239,7 +247,6 @@
         resContent.innerHTML = "";
         let count = 1;
 
-        // Başlık satırını atlayarak (i=1) başla
         for (let i = 1; i < rawLines.length; i++) {
             const cols = rawLines[i].split(/\t/);
             if (cols.length <= Math.max(cIdx, nIdx)) continue;
@@ -269,7 +276,6 @@
         const mainFolder = zip.folder("Urun_Klasorleri");
 
         folderNames.forEach(name => {
-            // İşletim sistemi için geçersiz karakterleri temizle
             let safeName = name.replace(/[<>:"/\\|?*]/g, '');
             mainFolder.folder(safeName);
         });
